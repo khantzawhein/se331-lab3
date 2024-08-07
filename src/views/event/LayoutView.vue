@@ -2,15 +2,20 @@
 import {onMounted, ref} from "vue";
 import type {Event} from "@/type";
 import EventService from "@/services/EventService";
+import {useRouter} from "vue-router";
 
 const props = defineProps<{ id: string }>();
-
+const router = useRouter();
 const event = ref<Event | null>(null);
 onMounted(async () => {
   try {
     event.value = (await EventService.getEvent(parseInt(props.id))).data
-  } catch (e) {
-    console.error(e)
+  } catch (e: any) {
+    if (e.response?.status === 404) {
+      await router.push({name: '404-resource-view', params: {resource: 'event'}})
+    } else {
+      await router.push({name: 'network-error-view'})
+    }
   }
 })
 </script>
